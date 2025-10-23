@@ -2,7 +2,10 @@
 set -e
 
 # TODO для создания баз прописать свой вариант
-export VARIANT="<variant>"
+export VARIANT="v4"
 export SCRIPT_PATH=/docker-entrypoint-initdb.d/
 export PGPASSWORD=postgres
 psql -f "$SCRIPT_PATH/scripts/db-$VARIANT.sql"
+psql -f "$SCRIPT_PATH/scripts/02-library.sql"
+psql -f "$SCRIPT_PATH/scripts/03-reservation.sql"
+psql -f "$SCRIPT_PATH/scripts/04-rating.sql"
