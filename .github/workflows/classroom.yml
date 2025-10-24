@@ -17,6 +17,12 @@ jobs:
 
       - uses: docker/setup-buildx-action@v2
 
+      - name: Setup Go 1.24.3
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24.3'
+
+
       # TODO build and run unit tests
 
       - name: Build images
@@ -31,29 +37,36 @@ jobs:
         env:
           WAIT_PORTS: 8080,8070,8060,8050
 
+      - name: Run Unit Tests
+        run: |
+            cd src/rating-system && go test ./internal/service/...
+            cd ../reservation-system && go test ./internal/service/...
+            cd ../library-system && go test ./internal/service/...
+
+
       # TODO setup variant, service and port
 
       - name: Run API Tests
         timeout-minutes: 5
         run: ./scripts/test-script.sh
         env:
-          VARIANT: <variant>
-          SERVICE_NAME: <your service name>
-          PORT_NUMBER: <port number>
+          VARIANT: v4
+          SERVICE_NAME: rating-service
+          PORT_NUMBER: 8060
 
       - uses: education/autograding@v1
         id: autograder
         continue-on-error: true
 
-      - name: Github auto grader mark
-        uses: Romanow/google-sheet-autograder-marker@v1.0
-        with:
-          google_token: ${{secrets.GOOGLE_API_KEY}}
-          sheet_id: "1xkgjUX6Qmk7rdJG-QPOToav-HWWtthJjnShIKnw3oIY"
-          homework_number: 3
-          user_column: 'D'
-          column_offset: 'F'
-          mark: "'+"
+#      - name: Github auto grader mark
+#        uses: Romanow/google-sheet-autograder-marker@v1.0
+#        with:
+#          google_token: ${{secrets.GOOGLE_API_KEY}}
+#          sheet_id: "1xkgjUX6Qmk7rdJG-QPOToav-HWWtthJjnShIKnw3oIY"
+#          homework_number: 3
+#          user_column: 'D'
+#          column_offset: 'F'
+#          mark: "'+"
 
       - name: Stop containers
         if: always()

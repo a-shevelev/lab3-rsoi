@@ -379,7 +379,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"bookUid\": \"{{bookUid}}\",\n    \"libraryUid\": \"{{libraryUid}}\",\n    \"tillDate\": \"2021-10-11\"\n}"
+							"raw": "{\n    \"bookUid\": \"{{bookUid}}\",\n    \"libraryUid\": \"{{libraryUid}}\",\n    \"tillDate\": \"2025-10-30\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/v1/reservations",
@@ -413,7 +413,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"bookUid\": \"{{bookUid}}\",\n    \"libraryUid\": \"{{libraryUid}}\",\n    \"tillDate\": \"2021-10-11\"\n}",
+									"raw": "{\n    \"bookUid\": \"{{bookUid}}\",\n    \"libraryUid\": \"{{libraryUid}}\",\n    \"tillDate\": \"2025-10-30\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -442,7 +442,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n \"reservationUid\": \"f464ca3a-fcf7-4e3f-86f0-76c7bba96f72\",\n \"status\": \"RENTED\",\n \"startDate\": \"2021-10-09\",\n \"tillDate\": \"2021-10-11\",\n \"book\": {\n  \"bookUid\": \"f7cdc58f-2caf-4b15-9727-f89dcc629b27\",\n  \"name\": \"Краткий курс C++ в 7 томах\",\n  \"author\": \"Бьерн Страуструп\",\n  \"genre\": \"Научная фантастика\"\n },\n \"library\": {\n  \"libraryUid\": \"83575e12-7ce0-48ee-9931-51919ff3c9ee\",\n  \"name\": \"Библиотека имени 7 Непьющих\",\n  \"address\": \"2-я Бауманская ул., д.5, стр.1\",\n  \"city\": \"Москва\"\n },\n \"rating\": {\n  \"stars\": 75\n }\n}"
+							"body": "{\n \"reservationUid\": \"f464ca3a-fcf7-4e3f-86f0-76c7bba96f72\",\n \"status\": \"RENTED\",\n \"startDate\": \"2025-10-24\",\n \"tillDate\": \"2025-10-30\",\n \"book\": {\n  \"bookUid\": \"f7cdc58f-2caf-4b15-9727-f89dcc629b27\",\n  \"name\": \"Краткий курс C++ в 7 томах\",\n  \"author\": \"Бьерн Страуструп\",\n  \"genre\": \"Научная фантастика\"\n },\n \"library\": {\n  \"libraryUid\": \"83575e12-7ce0-48ee-9931-51919ff3c9ee\",\n  \"name\": \"Библиотека имени 7 Непьющих\",\n  \"address\": \"2-я Бауманская ул., д.5, стр.1\",\n  \"city\": \"Москва\"\n },\n \"rating\": {\n  \"stars\": 75\n }\n}"
 						}
 					]
 				},
@@ -540,7 +540,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "[\n    {\n        \"reservationUid\": \"f464ca3a-fcf7-4e3f-86f0-76c7bba96f72\",\n        \"status\": \"RENTED\",\n        \"startDate\": \"2021-10-09\",\n        \"tillDate\": \"2021-10-11\",\n        \"book\": {\n            \"bookUid\": \"f7cdc58f-2caf-4b15-9727-f89dcc629b27\",\n            \"name\": \"Краткий курс C++ в 7 томах\",\n            \"author\": \"Бьерн Страуструп\",\n            \"genre\": \"Научная фантастика\"\n        },\n        \"library\": {\n            \"libraryUid\": \"83575e12-7ce0-48ee-9931-51919ff3c9ee\",\n            \"name\": \"Библиотека имени 7 Непьющих\",\n            \"address\": \"2-я Бауманская ул., д.5, стр.1\",\n            \"city\": \"Москва\"\n        }\n    }\n]"
+							"body": "[\n    {\n        \"reservationUid\": \"f464ca3a-fcf7-4e3f-86f0-76c7bba96f72\",\n        \"status\": \"RENTED\",\n        \"startDate\": \"2025-10-24\",\n        \"tillDate\": \"2025-10-30\",\n        \"book\": {\n            \"bookUid\": \"f7cdc58f-2caf-4b15-9727-f89dcc629b27\",\n            \"name\": \"Краткий курс C++ в 7 томах\",\n            \"author\": \"Бьерн Страуструп\",\n            \"genre\": \"Научная фантастика\"\n        },\n        \"library\": {\n            \"libraryUid\": \"83575e12-7ce0-48ee-9931-51919ff3c9ee\",\n            \"name\": \"Библиотека имени 7 Непьющих\",\n            \"address\": \"2-я Бауманская ул., д.5, стр.1\",\n            \"city\": \"Москва\"\n        }\n    }\n]"
 						}
 					]
 				},
@@ -970,7 +970,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"bookUid\": \"{{bookUid}}\",\n    \"libraryUid\": \"{{libraryUid}}\",\n    \"tillDate\": \"2021-10-11\"\n}"
+									"raw": "{\n    \"bookUid\": \"{{bookUid}}\",\n    \"libraryUid\": \"{{libraryUid}}\",\n    \"tillDate\": \"2025-10-30\"\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/v1/reservations",
@@ -1137,7 +1137,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"bookUid\": \"{{bookUid}}\",\n    \"libraryUid\": \"{{libraryUid}}\",\n    \"tillDate\": \"2021-10-11\"\n}"
+									"raw": "{\n    \"bookUid\": \"{{bookUid}}\",\n    \"libraryUid\": \"{{libraryUid}}\",\n    \"tillDate\": \"2025-10-30\"\n}"
 								},
 								"url": {
 									"raw": "{{baseUrl}}/api/v1/reservations",
