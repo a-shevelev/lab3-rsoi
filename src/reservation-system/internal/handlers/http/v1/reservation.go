@@ -25,6 +25,7 @@ func (h *ReservationHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		resRoutes.GET("/", h.GetReservations)
 		resRoutes.PUT("/:uid", h.UpdateStatus)
 		resRoutes.GET("/amount", h.GetCurrentAmount)
+		resRoutes.DELETE("/:uid/delete", h.DeleteReservation)
 
 	}
 }
@@ -122,6 +123,20 @@ func (h *ReservationHandler) UpdateStatus(c *gin.Context) {
 	}
 
 	if err := h.service.UpdateStatus(c, uid, req.Date); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+func (h *ReservationHandler) DeleteReservation(c *gin.Context) {
+	var GetUIDRequest GetUIDRequest
+	if err := c.ShouldBindUri(&GetUIDRequest); err != nil {
+	}
+
+	err := h.service.DeleteReservation(c, GetUIDRequest.UID)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

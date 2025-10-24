@@ -22,6 +22,7 @@ type ReservationServiceIFace interface {
 	GetReservations(ctx context.Context, username string) ([]models.Reservation, error)
 	GetCurrentAmount(ctx context.Context, username string) (uint64, error)
 	UpdateStatus(ctx context.Context, reservationUID uuid.UUID, status string) error
+	DeleteReservation(ctx context.Context, reservationUID string) error
 }
 
 type reservationService struct {
@@ -92,4 +93,8 @@ func (r *reservationService) UpdateStatus(ctx context.Context, reservationUID uu
 		status = "EXPIRED"
 	}
 	return r.repo.UpdateReservationStatus(ctx, reservationUID, status)
+}
+
+func (r *reservationService) DeleteReservation(ctx context.Context, reservationUID string) error {
+	return r.repo.Delete(ctx, reservationUID)
 }

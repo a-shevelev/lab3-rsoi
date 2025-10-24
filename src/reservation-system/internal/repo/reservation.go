@@ -18,6 +18,7 @@ type ReservationRepo interface {
 	GetCurrentReservationsAmount(ctx context.Context, username string) (uint64, error)
 	GetReservations(ctx context.Context, username string) ([]models.Reservation, error)
 	UpdateReservationStatus(ctx context.Context, reservationUID uuid.UUID, status string) error
+	Delete(ctx context.Context, reservationUID string) error
 }
 
 type reservationRepo struct {
@@ -131,4 +132,17 @@ func (r *reservationRepo) UpdateReservationStatus(ctx context.Context, reservati
 		return err
 	}
 	return nil
+}
+
+func (r *reservationRepo) Delete(ctx context.Context, reservationUID string) error {
+	sql, args, err := qb.Delete("reservation").Where(squirrel.Eq{"reservation_uid": reservationUID}).ToSql()
+	if err != nil {
+		return err
+	}
+	_, err = r.conn.Exec(ctx, sql, args...)
+	if err != nil {
+		return err
+	}
+	return nil
+
 }

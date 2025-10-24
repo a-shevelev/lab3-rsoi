@@ -18,68 +18,73 @@ services:
       interval: 2s
       retries: 10
 
-  library-service:
-    build:
-      context: ./src/library-system
-      dockerfile: Dockerfile
-    container_name: library-service
+  rabbitmq:
+    image: rabbitmq:4.1-management
     ports:
-      - "8050:8050"
-    environment:
-      DB_CONN_STRING: "postgres://postgres:postgres@postgres/libraries"
-      SERVER_PORT: 8050
-    restart: unless-stopped
-    depends_on:
-      postgres:
-          condition: service_healthy
+      - "15672:15672"
 
-  rating-service:
-    build:
-      context: ./src/rating-system
-      dockerfile: Dockerfile
-    container_name: rating-service
-    ports:
-      - "8060:8060"
-    environment:
-      DB_CONN_STRING: "postgres://postgres:postgres@postgres/ratings"
-      SERVER_PORT: 8060
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  reservation-service:
-    build:
-      context: ./src/reservation-system
-      dockerfile: Dockerfile
-    container_name: reservation-service
-    ports:
-      - "8070:8070"
-    environment:
-      DB_CONN_STRING: "postgres://postgres:postgres@postgres/reservations"
-      SERVER_PORT: 8070
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  gateway-api:
-    build:
-      context: ./src/gateway-api
-      dockerfile: Dockerfile
-    container_name: gateway-api
-    ports:
-      - "8080:8080"
-    environment:
-      SERVER_PORT: 8080
-      LIBRARY_SYSTEM_BASE_URL: http://library-service:8050
-      RATING_SYSTEM_BASE_URL: http://rating-service:8060
-      RESERVATION_SYSTEM_BASE_URL: http://reservation-service:8070
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-
+    #  library-service:
+#    build:
+#      context: ./src/library-system
+#      dockerfile: Dockerfile
+#    container_name: library-service
+#    ports:
+#      - "8050:8050"
+#    environment:
+#      DB_CONN_STRING: "postgres://postgres:postgres@postgres/libraries"
+#      SERVER_PORT: 8050
+#    restart: unless-stopped
+#    depends_on:
+#      postgres:
+#          condition: service_healthy
+#
+#  rating-service:
+#    build:
+#      context: ./src/rating-system
+#      dockerfile: Dockerfile
+#    container_name: rating-service
+#    ports:
+#      - "8060:8060"
+#    environment:
+#      DB_CONN_STRING: "postgres://postgres:postgres@postgres/ratings"
+#      SERVER_PORT: 8060
+#    restart: unless-stopped
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#
+#  reservation-service:
+#    build:
+#      context: ./src/reservation-system
+#      dockerfile: Dockerfile
+#    container_name: reservation-service
+#    ports:
+#      - "8070:8070"
+#    environment:
+#      DB_CONN_STRING: "postgres://postgres:postgres@postgres/reservations"
+#      SERVER_PORT: 8070
+#    restart: unless-stopped
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#
+#  gateway-api:
+#    build:
+#      context: ./src/gateway-api
+#      dockerfile: Dockerfile
+#    container_name: gateway-api
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      SERVER_PORT: 8080
+#      LIBRARY_SYSTEM_BASE_URL: http://library-service:8050
+#      RATING_SYSTEM_BASE_URL: http://rating-service:8060
+#      RESERVATION_SYSTEM_BASE_URL: http://reservation-service:8070
+#    restart: unless-stopped
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#
 
 volumes:
   db-data:
