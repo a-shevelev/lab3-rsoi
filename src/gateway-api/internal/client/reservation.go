@@ -5,12 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"gateway-api/internal/dto"
+	"gateway-api/pkg/circuit"
 	"net/http"
+	"time"
 )
 
 type Reservation struct {
 	BaseURL    string `envconfig:"BASE_URL"`
 	HTTPClient *http.Client
+	GetBreaker *circuit.Breaker
 }
 
 // NewReservationClient создаёт новый клиент для ReservationService
@@ -18,7 +21,17 @@ func NewReservation(baseURL string) *Reservation {
 	return &Reservation{
 		BaseURL:    baseURL,
 		HTTPClient: http.DefaultClient,
+		GetBreaker: circuit.NewBreaker(3, 5*time.Second),
 	}
+}
+
+func (c *Reservation) isHealthy() bool {
+	resp, err := c.HTTPClient.Get(fmt.Sprintf("%s/manage/health", c.BaseURL))
+	if err != nil {
+		return false
+	}
+	defer resp.Body.Close()
+	return resp.StatusCode == http.StatusOK
 }
 
 func (c *Reservation) Get(username string) ([]dto.ReservationResponse, error) {
@@ -73,6 +86,26 @@ func (c *Reservation) GetByUID(uid string) (*dto.ReservationResponse, error) {
 	return &result, nil
 }
 
+func (c *Reservation) DeleteReservation(uid string) error {
+	req, err := http.NewRequest("GET",
+		fmt.Sprintf("%s/api/v1/reservation/%s", c.BaseURL, uid), nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
 func (c *Reservation) GetCurrentAmount(username string) (int, error) {
 	req, err := http.NewRequest("GET",
 		fmt.Sprintf("%s/api/v1/reservation/amount", c.BaseURL), nil)
@@ -102,39 +135,48 @@ func (c *Reservation) GetCurrentAmount(username string) (int, error) {
 }
 
 func (c *Reservation) Create(username string, req dto.CreateReservationRequest) (*dto.ReservationResponse, error) {
-	body, err := json.Marshal(&req)
-	if err != nil {
-		return nil, err
+	action := func() (*dto.ReservationResponse, error) {
+		body, err := json.Marshal(&req)
+		if err != nil {
+			return nil, err
+		}
+
+		httpReq, err := http.NewRequest(
+			http.MethodPost,
+			fmt.Sprintf("%s/api/v1/reservation", c.BaseURL),
+			bytes.NewReader(body),
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		httpReq.Header.Set("X-User-Name", username)
+		httpReq.Header.Set("Content-Type", "application/json")
+
+		resp, err := c.HTTPClient.Do(httpReq)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusCreated {
+			return nil, fmt.Errorf("unexpected status: %d", resp.StatusCode)
+		}
+
+		var result dto.ReservationResponse
+		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+			return nil, err
+		}
+
+		return &result, nil
 	}
 
-	httpReq, err := http.NewRequest(
-		http.MethodPost,
-		fmt.Sprintf("%s/api/v1/reservation", c.BaseURL),
-		bytes.NewReader(body),
-	)
-	if err != nil {
-		return nil, err
+	fallback := func() *dto.ReservationResponse {
+		return &dto.ReservationResponse{}
 	}
 
-	httpReq.Header.Set("X-User-Name", username)
-	httpReq.Header.Set("Content-Type", "application/json")
+	return circuit.WithCircuitBreaker(c.GetBreaker, action, fallback, c.isHealthy)
 
-	resp, err := c.HTTPClient.Do(httpReq)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("unexpected status: %d", resp.StatusCode)
-	}
-
-	var result dto.ReservationResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, err
-	}
-
-	return &result, nil
 }
 
 func (c *Reservation) UpdateStatus(uid string, date string) error {

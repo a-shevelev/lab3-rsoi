@@ -1,9 +1,11 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"gateway-api/internal/client"
 	"gateway-api/internal/dto"
+	"gateway-api/pkg/ext"
 )
 
 type ReservationService struct {
@@ -46,24 +48,46 @@ func (s *ReservationService) CreateReservation(username string, req dto.CreateRe
 	if err != nil {
 		return nil, fmt.Errorf("failed to get current amount: %s", err)
 	}
+
 	starsCount, err := s.ClientRate.Get(username)
 	if err != nil {
+		if errors.Is(err, ext.ServiceUnavailableError) {
+			return nil, ext.RatingServiceUnavailableError
+		}
 		return nil, fmt.Errorf("failed to get rating: %s", err)
+	}
+	books, err := s.ClientLib.GetBookByUID(req.BookUID)
+	if err != nil {
+		if errors.Is(err, ext.ServiceUnavailableError) {
+			return nil, ext.LibraryServiceUnavailableError
+		}
+		return nil, fmt.Errorf("failed to get book by uid: %s", err)
+	}
+	if books.AvailableCount < 0 {
+		return nil, ext.BookNotAvailableError
 	}
 	if resCount >= starsCount.Stars {
 		return nil, fmt.Errorf("You rented maximum amount of books", resCount)
 	}
 	result, err := s.ClientRes.Create(username, req)
 	if err != nil {
+		if errors.Is(err, ext.ServiceUnavailableError) {
+			return nil, ext.ReservationServiceUnavailableError
+		}
 		return nil, fmt.Errorf("failed to create reservation: %s", err)
 	}
 	err = s.ClientLib.UpdateBookCount(result.LibraryUID, result.BookUID, -1)
 	if err != nil {
+
 		return nil, fmt.Errorf("failed to update book count: %s", err)
 	}
 
 	book, err := s.ClientLib.GetBookByUID(result.BookUID)
 	if err != nil {
+		err := s.ClientRes.DeleteReservation(result.ReservationUID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to delete book: %s", err)
+		}
 		return nil, err
 	}
 	lib, err := s.ClientLib.GetLibraryByUID(result.LibraryUID)

@@ -1,10 +1,16 @@
 package handlers
 
 import (
+	"errors"
 	"gateway-api/internal/service"
+	"gateway-api/pkg/ext"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	RatingServiceUnavailable = errors.New("Bonus Service unavailable")
 )
 
 type RatingHandler struct {
@@ -29,6 +35,10 @@ func (h *RatingHandler) GetRating(c *gin.Context) {
 
 	rating, err := h.Service.GetRating(username)
 	if err != nil {
+		if errors.Is(err, ext.ServiceUnavailableError) {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"message": RatingServiceUnavailable.Error()})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

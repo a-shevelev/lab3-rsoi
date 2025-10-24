@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"errors"
 	"gateway-api/internal/dto"
 	"gateway-api/internal/service"
+	"gateway-api/pkg/ext"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -53,6 +55,21 @@ func (h *ReservationHandler) CreateReservation(c *gin.Context) {
 
 	reservation, err := h.Service.CreateReservation(username, req)
 	if err != nil {
+		if errors.Is(err, ext.LibraryServiceUnavailableError) {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"message": ext.LibraryServiceUnavailableError.Error()})
+			return
+		}
+		if errors.Is(err, ext.RatingServiceUnavailableError) {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"message": ext.RatingServiceUnavailableError.Error()})
+			return
+		}
+		if errors.Is(err, ext.ReservationServiceUnavailableError) {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"message": ext.ReservationServiceUnavailableError.Error()})
+			return
+		}
+		if errors.Is(err, ext.BookNotAvailableError) {
+			c.JSON(http.StatusBadRequest, gin.H{"message": ext.BookNotAvailableError.Error()})
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
