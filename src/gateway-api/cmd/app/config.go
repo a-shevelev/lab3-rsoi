@@ -10,4 +10,5 @@ type Config struct {
 	ReservationSystem client.Reservation `envconfig:"RESERVATION_SYSTEM"`
 	LibrarySystem     client.Library     `envconfig:"LIBRARY_SYSTEM"`
 	RatingSystem      client.Rating      `envconfig:"RATING_SYSTEM"`
+	RabbitMQ          string             `envconfig:"RABBITMQ"`
 }

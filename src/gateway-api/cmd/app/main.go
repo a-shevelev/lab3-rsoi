@@ -6,6 +6,7 @@ import (
 	"gateway-api/internal/server"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/streadway/amqp"
 
 	"github.com/kelseyhightower/envconfig"
 )
@@ -23,8 +24,25 @@ func main() {
 	clientRating := client.NewRating(cfg.RatingSystem.BaseURL)
 	clientReservation := client.NewReservation(cfg.ReservationSystem.BaseURL)
 
-	srv, err := server.New(cfg.Server.Host, cfg.Server.Port,
-		clientLibrary, clientRating, clientReservation)
+	conn, err := amqp.Dial(cfg.RabbitMQ)
+	if err != nil {
+		log.WithError(err).Errorf("Failed to connect to RabbitMQ")
+	}
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	if err != nil {
+		log.WithError(err).Errorf("Failed to open a channel")
+	}
+	defer ch.Close()
+
+	srv, err := server.New(
+		cfg.Server.Host,
+		cfg.Server.Port,
+		clientLibrary,
+		clientRating,
+		clientReservation,
+		ch)
 	if err != nil {
 		log.WithError(err).Error("failed to initialize server")
 	}

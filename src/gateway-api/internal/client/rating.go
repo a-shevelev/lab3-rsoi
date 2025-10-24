@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gateway-api/internal/dto"
 	"gateway-api/pkg/circuit"
+	"gateway-api/pkg/ext"
 	"net/http"
 	"time"
 )
@@ -67,6 +68,10 @@ func (c *Rating) Get(username string) (*dto.UserRatingResponse, error) {
 }
 
 func (c *Rating) Update(username string, stars int) error {
+
+	if !c.isHealthy() {
+		return ext.ServiceUnavailableError
+	}
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/api/v1/rating/stars/%d/", c.BaseURL, stars), nil)
 	if err != nil {
 		return err

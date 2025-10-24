@@ -45,3 +45,13 @@ func ReservationToFull(
 		Library:        library,
 	}
 }
+
+type ReturnRetryEvent struct {
+	Username       string `json:"username,omitzero"`
+	ReservationUID string `json:"reservation_uid,omitzero"`
+	BookUID        string `json:"book_uid,omitzero"`
+	LibraryUID     string `json:"library_uid,omitzero"`
+	RateDelta      int    `json:"rate_delta,omitzero"`
+	Condition      string `json:"condition,omitzero"`
+	Date           string `json:"date,omitzero"`
+}
