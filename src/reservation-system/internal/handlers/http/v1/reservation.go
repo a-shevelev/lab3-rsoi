@@ -25,7 +25,7 @@ func (h *ReservationHandler) RegisterRoutes(rg *gin.RouterGroup) {
 		resRoutes.GET("/", h.GetReservations)
 		resRoutes.PUT("/:uid", h.UpdateStatus)
 		resRoutes.GET("/amount", h.GetCurrentAmount)
-		resRoutes.DELETE("/:uid/delete", h.DeleteReservation)
+		resRoutes.DELETE("/:uid", h.DeleteReservation)
 
 	}
 }
