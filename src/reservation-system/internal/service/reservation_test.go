@@ -42,6 +42,11 @@ func (m *MockReservationRepo) UpdateReservationStatus(ctx context.Context, uid u
 	return args.Error(0)
 }
 
+func (m *MockReservationRepo) Delete(ctx context.Context, reservationUID string) error {
+	args := m.Called(ctx, reservationUID)
+	return args.Error(0)
+}
+
 func TestCreateReservation_Success(t *testing.T) {
 	mockRepo := new(MockReservationRepo)
 	svc := service.NewReservationService(mockRepo)
