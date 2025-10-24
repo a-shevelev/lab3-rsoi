@@ -38,10 +38,9 @@ func RunRetryWorker(ch *amqp.Channel, queueName string, process func(evt dto.Ret
 				if errors.Is(err, ext.ServiceUnavailableError) {
 					log.Printf("[worker %s] service unavailable, retrying in 10s: %v", queueName, err)
 					time.Sleep(10 * time.Second)
-					continue // повторяем
+					continue
 				}
 
-				// Если ошибка не retryable — drop
 				log.Printf("[worker %s] non-retryable, dropping: %v", queueName, err)
 				_ = d.Ack(false)
 				break

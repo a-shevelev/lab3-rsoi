@@ -88,6 +88,7 @@ services:
       LIBRARY_SYSTEM_BASE_URL: http://library-service:8050
       RATING_SYSTEM_BASE_URL: http://rating-service:8060
       RESERVATION_SYSTEM_BASE_URL: http://reservation-service:8070
+      RABBITMQ: "amqp://guest:guest@rabbitmq"
     restart: unless-stopped
     depends_on:
       postgres:
