@@ -8,6 +8,7 @@ COPY go.mod go.sum ./
 #COPY person-service.yaml ./person-service.yaml
 COPY "cmd/" "./cmd"
 COPY internal ./internal
+COPY pkg ./pkg
 
 RUN go mod tidy
 
