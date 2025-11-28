@@ -21,7 +21,7 @@ func NewLibrary(baseURL string) *Library {
 	return &Library{
 		BaseURL:    baseURL,
 		HTTPClient: http.DefaultClient,
-		GetBreaker: circuit.NewBreaker(3, 5*time.Second),
+		GetBreaker: circuit.NewBreaker(3, 5*time.Second, 60*time.Second, 3),
 	}
 }
 

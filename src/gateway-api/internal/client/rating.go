@@ -20,7 +20,7 @@ func NewRating(baseURL string) *Rating {
 	return &Rating{
 		BaseURL:    baseURL,
 		HTTPClient: http.DefaultClient,
-		GetBreaker: circuit.NewBreaker(3, 5*time.Second),
+		GetBreaker: circuit.NewBreaker(3, 5*time.Second, 60*time.Second, 3),
 	}
 }
 

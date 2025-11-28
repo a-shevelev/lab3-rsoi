@@ -16,12 +16,11 @@ type Reservation struct {
 	GetBreaker *circuit.Breaker
 }
 
-// NewReservationClient создаёт новый клиент для ReservationService
 func NewReservation(baseURL string) *Reservation {
 	return &Reservation{
 		BaseURL:    baseURL,
 		HTTPClient: http.DefaultClient,
-		GetBreaker: circuit.NewBreaker(3, 5*time.Second),
+		GetBreaker: circuit.NewBreaker(3, 5*time.Second, 60*time.Second, 3),
 	}
 }
 

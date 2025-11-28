@@ -14,21 +14,45 @@ const (
 )
 
 type Breaker struct {
-	mu            sync.Mutex
-	state         State
-	failureCount  int
-	threshold     int
-	retryAfter    time.Duration
-	lastFailTime  time.Time
-	onStateChange func(State)
+	mu                sync.Mutex
+	state             State
+	failureTimes      []time.Time
+	threshold         int
+	retryAfter        time.Duration
+	failureTimer      time.Duration
+	halfOpenLimit     int
+	openTime          time.Time
+	halfOpenSuccesses int
+	onStateChange     func(State)
 }
 
-func NewBreaker(threshold int, retryAfter time.Duration) *Breaker {
+func NewBreaker(threshold int, retryAfter, window time.Duration, halfOpenLimit int) *Breaker {
 	return &Breaker{
-		state:      Closed,
-		threshold:  threshold,
-		retryAfter: retryAfter,
+		state:         Closed,
+		threshold:     threshold,
+		retryAfter:    retryAfter,
+		failureTimer:  window,
+		halfOpenLimit: halfOpenLimit,
+		failureTimes:  make([]time.Time, 0),
 	}
+}
+
+func (b *Breaker) clearOldFailures() {
+	now := time.Now()
+	validFailures := make([]time.Time, 0)
+
+	for _, t := range b.failureTimes {
+		if now.Sub(t) <= b.failureTimer {
+			validFailures = append(validFailures, t)
+		}
+	}
+
+	b.failureTimes = validFailures
+}
+
+func (b *Breaker) getFailureCount() int {
+	b.clearOldFailures()
+	return len(b.failureTimes)
 }
 
 func (b *Breaker) Execute(
@@ -39,13 +63,14 @@ func (b *Breaker) Execute(
 	b.mu.Lock()
 	switch b.state {
 	case Open:
-		if time.Since(b.lastFailTime) < b.retryAfter {
+		if time.Since(b.openTime) < b.retryAfter {
 			b.mu.Unlock()
 			return fallback(), nil
 		}
-
 		b.state = HalfOpen
-	case Closed, HalfOpen:
+		b.halfOpenSuccesses = 0
+	case HalfOpen:
+	case Closed:
 	default:
 		panic("unhandled default case")
 	}
@@ -56,30 +81,49 @@ func (b *Breaker) Execute(
 		b.recordFailure()
 		return fallback(), err
 	}
-	b.reset()
+
+	b.recordSuccess()
 	return result, nil
 }
 
 func (b *Breaker) recordFailure() {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	b.failureCount++
-	b.lastFailTime = time.Now()
-	if b.failureCount >= b.threshold {
-		b.state = Open
-		if b.onStateChange != nil {
-			b.onStateChange(b.state)
-		}
-	}
-}
 
-func (b *Breaker) reset() {
-	b.mu.Lock()
-	defer b.mu.Unlock()
-	b.failureCount = 0
-	b.state = Closed
+	now := time.Now()
+	b.failureTimes = append(b.failureTimes, now)
+	b.clearOldFailures()
+
+	if b.state == HalfOpen {
+		b.state = Open
+		b.openTime = now
+		b.halfOpenSuccesses = 0
+	} else if b.getFailureCount() >= b.threshold {
+		b.state = Open
+		b.openTime = now
+	}
+
 	if b.onStateChange != nil {
 		b.onStateChange(b.state)
 	}
+}
 
+func (b *Breaker) recordSuccess() {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
+	switch b.state {
+	case HalfOpen:
+		b.halfOpenSuccesses++
+		if b.halfOpenSuccesses >= b.halfOpenLimit {
+			b.state = Closed
+			b.halfOpenSuccesses = 0
+		}
+	case Closed:
+		b.clearOldFailures()
+	}
+
+	if b.onStateChange != nil {
+		b.onStateChange(b.state)
+	}
 }
